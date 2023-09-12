@@ -1,1 +1,1 @@
-# PeerlistXReplt Generative AI Hackathon
+# Peerlist X Replit Generative AI Hackathon
