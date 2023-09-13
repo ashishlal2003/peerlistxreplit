@@ -45,4 +45,14 @@ const summarize = async(req, res, next) => {
     res.send(500).json({ message: error.message })
   }
 };
-module.exports = { anyPrompt, summarize };
+
+//complete quiz controller
+const quiz = async(req, res, next) => {
+  try {
+    
+  } catch (error) {
+    res.send(500).json({ message: error.message })
+  }
+};
+
+module.exports = { anyPrompt, summarize, quiz };
