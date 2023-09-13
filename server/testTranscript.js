@@ -4,3 +4,4 @@ YoutubeTranscript.fetchTranscript('https://www.youtube.com/watch?v=ExZnOl7ZXO8')
   const completeText = transcript.map((entry) => entry.text).join(' ');
   console.log(completeText);
 });
+
