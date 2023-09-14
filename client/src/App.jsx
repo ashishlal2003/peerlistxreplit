@@ -1,5 +1,9 @@
-import "./App.css";
-function App() {
-  return <>hello world!</>;
+import React from "react";
+import Home from "./Pages/Home/Home"
+export default function App() {
+  return (
+    <>
+    <Home />
+    </>
+  )
 }
-export default App;
