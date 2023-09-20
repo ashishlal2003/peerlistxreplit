@@ -23,7 +23,7 @@ const anyPrompt = async(req, res, next) => {
       // const formattedOutput = formattedOutput(result[0].candidates[0].output);
       res.status(200).json(result[0].candidates[0].output);
     } catch (error) {
-      res.send(500).json({ message: error.message })
+      res.status(500).json({ message: error.message })
     }
 };
 
