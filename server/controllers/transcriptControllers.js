@@ -1,9 +1,9 @@
-const { YoutubeTranscript } = require('youtube-transcript');
+const {YouTubeTranscriptApi} = require('youtube_transcript_api');
 
 const getTranscript = async (req, res) => {
     try {
       const { videoURL } = req.body;
-      const transcript = await YoutubeTranscript.fetchTranscript(videoURL).then((transcript) => {
+      const transcript = await YouTubeTranscriptApi.get_transcript(videoURL).then((transcript) => {
         const completeText = transcript.map((entry) => entry.text).join(' ');
         return completeText;
       });
