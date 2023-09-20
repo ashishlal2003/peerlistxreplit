@@ -5,7 +5,7 @@ const transcript = require("../utility/transcript");
 
 
 const MODEL_NAME = "models/text-bison-001";
-const API_KEY = "AIzaSyCcrKRaX4Lx5RjcjEaY7IYN1dA7UUTFm1M";
+const API_KEY = "AIzaSyD4kJWgEQXDxOAO7QZLyzyrlKZkwFt2U1E";
 
 const client = new TextServiceClient({
   authClient: new GoogleAuth().fromAPIKey(API_KEY),
@@ -20,7 +20,7 @@ const anyPrompt = async(req, res, next) => {
           text: prompt,
         },
       });
-      // const formattedOutput = formattedOutput(result[0].candidates[0].output);
+      // console.log(result);
       res.status(200).json(result[0].candidates[0].output);
     } catch (error) {
       res.status(500).json({ message: error.message })
@@ -32,13 +32,17 @@ const summarize = async (req, res, next) => {
   try {
     const { videoURL } = req.body;
     const toSummarize = await transcript(videoURL);
-    const prompt = `Summarize the following for me in 5 paragraphs: ${toSummarize}`;
+    // console.log(toSummarize);
+    const txt = "";
+
+    console.log(txt);
     const result = await client.generateText({
       model: MODEL_NAME,
       prompt: {
-        text: prompt,
+        text: txt,
       },
     });
+    // console.log(result);
     res.status(200).json(result[0].candidates[0].output);
   } catch (error) {
     res.status(500).json({ message: error.message });
