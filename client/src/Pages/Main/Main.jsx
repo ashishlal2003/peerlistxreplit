@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import {MdSummarize} from "react-icons/md"
 import { sendReqToServer } from "../../../api/useAxios";
@@ -13,48 +13,33 @@ export default function Main() {
         chat: [],
     });
 
-    useEffect(() => {
-        const savedVideoLink = localStorage.getItem("videoLink");
-        const extractedVideoId = extractVideoId(savedVideoLink);
-
-        setState((prevState) => ({
-            ...prevState,
-            videoLink: savedVideoLink || "",
-            videoId: extractedVideoId || "",
-        }));
-
-        if (savedVideoLink) {
-            getTranscript(savedVideoLink);
-        }
-    }, []);
-
     const extractVideoId = (link) => {
         const regex = /[?&]v=([^&]+)/;
         const match = link.match(regex);
         return match && match[1];
     };
 
-    const getTranscript = async (videoLink) => {
+    const getTranscript = useCallback(async (videoLink) => {
         try {
-            const { response, error } = await sendReqToServer({
-                axiosInstance: axios,
-                url: USER.getTranscript,
-                method: "POST",
-                requestConfig: {
-                    videoURL: videoLink,
-                },
-            });
-
-            if (response) {
-                setState((prevState) => ({
-                    ...prevState,
-                    transcript: response.transcript,
-                }));
-            }
+          const { response, error } = await sendReqToServer({
+            axiosInstance: axios,
+            url: USER.getTranscript,
+            method: "POST",
+            requestConfig: {
+              videoURL: videoLink,
+            },
+          });
+    
+          if (response) {
+            setState((prevState) => ({
+              ...prevState,
+              transcript: response.transcript,
+            }));
+          }
         } catch (err) {
-            console.log(err);
+          console.log(err);
         }
-    };
+      }, []);
 
     const summarize = async (videoLink) => {
         try {
@@ -67,6 +52,34 @@ export default function Main() {
                 },
             });
             if(response) {
+                const updatedChat = [
+                    ...state.chat,
+                    { question: "Summarize the video for me", answer: response },
+                ];
+
+                setState((prevState) => ({
+                    ...prevState,
+                    chat: updatedChat,
+                }));
+            }
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
+    const genQuiz = async (videoLink) => {
+        try {
+            const { response, error } = await sendReqToServer({
+                axiosInstance: axios,
+                url: USER.quiz,
+                method: "POST",
+                requestConfig: {
+                    videoURL: videoLink,
+                },
+            });
+            if(response) {
+                console.log(response)
                 const updatedChat = [
                     ...state.chat,
                     { question: "Summarize the video for me", answer: response },
@@ -114,20 +127,22 @@ export default function Main() {
     const getResult = async () => {
         // Call the promptResult function with the question
         promptResult(state.promptValue);
-
-        // Add the current question to the chat array
-        const updatedChat = [
-            ...state.chat,
-            { question: state.promptValue, answer: "" },
-        ];
-
-        setState((prevState) => ({
-            ...prevState,
-            chat: updatedChat,
-        }));
     };
 
-
+    useEffect(() => {
+        const savedVideoLink = localStorage.getItem("videoLink");
+        const extractedVideoId = extractVideoId(savedVideoLink);
+    
+        setState((prevState) => ({
+          ...prevState,
+          videoLink: savedVideoLink || "",
+          videoId: extractedVideoId || "",
+        }));
+    
+        if (savedVideoLink) {
+          getTranscript(savedVideoLink);
+        }
+      }, [getTranscript]); 
     // Function to handle sending a message (you can implement your logic here)
 
     return (
@@ -164,14 +179,15 @@ export default function Main() {
 
                         </div>
                     </div>
-                    <div className="h-full mt-2 text-slate-200 w-full p-2 overflow-y-auto rounded bg-gray-800 shadow">
+                    <div className="h-full text-justify mt-2 text-slate-200 w-full p-3 overflow-y-auto rounded bg-gray-800 shadow">
                         {state.transcript}
                     </div>
                 </section>
             </div>
             <div className="md:flex hidden w-full h-full md:flex-col overflow-hidden rounded relative bg-gray-700 shadow-lg backdrop-blur">
                 <div className="w-full p-3 bg-gray-900 backdrop-blur absolute top-0 left-0 text-slate-100 font-semibold text-center">Chatbot</div>
-                <div className="w-full h-full">
+                <div className="w-full pb-24 pt-12 overflow-y-auto h-full">
+                    <div className=""></div>
                     {state.chat.map((chatItem, index) => (
                         <div key={index}>
                             <div className="py-3 w-full px-6 text-slate-200 bg-gray-800">{chatItem.question}</div>
@@ -179,7 +195,11 @@ export default function Main() {
                         </div>
                     ))}
                 </div>
-                <div className="w-full p-2 bg-gray-800 backdrop-blur absolute bottom-0 left-0">
+                <div className="w-full flex flex-col p-2 bg-gray-800 backdrop-blur absolute bottom-0 left-0">
+                    <div className="w-full flex gap-2 mb-2">
+                        <button type="button" className="bg-gray-700 text-slate-200 py-2 px-3 rounded-lg" onClick={()=>summarize(state.videoLink)}>Summarize</button>
+                        <button type="button" className="bg-gray-700 text-slate-200 py-2 px-3 rounded-lg" onClick={()=>genQuiz(state.videoLink)}>Generate Quiz</button>
+                    </div>
                     <div className="relative w-full">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21">
@@ -196,7 +216,7 @@ export default function Main() {
                             <RiSendPlane2Fill className="text-gray-400" />
                         </button>
 
-                    </div>a
+                    </div>
                 </div>
             </div>
         </div>
